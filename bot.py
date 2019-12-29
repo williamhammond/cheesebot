@@ -96,6 +96,7 @@ class CheeseBot(sc2.BotAI):
                     self.structures(CYBERNETICSCORE).ready
                     and self.can_afford(STALKER)
                     and self.supply_left > 0 
+                    and gateway.is_idle
                 ):
                     self.do(gateway.train(STALKER))
     
@@ -117,8 +118,6 @@ class CheeseBot(sc2.BotAI):
             return random.choice(self.enemy_structures)
         else:
             return self.enemy_start_locations[0]
-
-
 
 run_game(maps.get("AcropolisLE"), [
     Bot(Race.Protoss, CheeseBot()),
