@@ -55,7 +55,7 @@ class CheeseBot(sc2.BotAI):
             and self.already_pending(PYLON) < 2
         ):
             if self.can_afford(PYLON):
-                await self.build(PYLON, near=nexus)
+                await self.build(PYLON, near=nexus.position.towards(self.game_info.map_center, 5))
     
     async def build_assimilators(self):
         for nexus in self.structures(NEXUS).ready:
@@ -107,9 +107,11 @@ class CheeseBot(sc2.BotAI):
                     self.do(stalker.attack(random.choice(self.enemy_units)))
     
     async def attack(self):
-        if self.units(STALKER).amount > 30:
-            for stalker in self.units(STALKER).idle:
+        for stalker in self.units(STALKER).idle:
+            if self.units(STALKER).amount > 20:
                 self.do(stalker.attack(self.find_target(self.state)))
+            else:
+                self.do(stalker.move(self.game_info.map_center))
     
     def find_target(self, state):
         if self.enemy_units:
@@ -121,5 +123,5 @@ class CheeseBot(sc2.BotAI):
 
 run_game(maps.get("AcropolisLE"), [
     Bot(Race.Protoss, CheeseBot()),
-    Computer(Race.Protoss, Difficulty.Easy)
+    Computer(Race.Terran, Difficulty.VeryHard)
 ], realtime=False)
