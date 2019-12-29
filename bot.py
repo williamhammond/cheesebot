@@ -9,9 +9,6 @@ import random
 
 class CheeseBot(sc2.BotAI):
     async def on_step(self, iteration: int):
-        if iteration == 0:
-            await self.chat_send('glhf')
-
         await self.defend()
         await self.distribute_workers()
         await self.handle_chrono()
@@ -22,6 +19,9 @@ class CheeseBot(sc2.BotAI):
         await self.build_units()
         await self.expand()
         await self.attack()
+    
+    async def on_start(self):
+        await self.chat_send('glhf')
 
     async def handle_chrono(self):
         for i in range(self.townhalls.amount):
