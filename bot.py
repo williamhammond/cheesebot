@@ -24,19 +24,20 @@ class CheeseBot(sc2.BotAI):
         await self.attack()
 
     async def handle_chrono(self):
-        nexus = self.townhalls.random
-        nexuses = self.structures(NEXUS)
-        abilities = await self.get_available_abilities(nexuses)
-        for loop_nexus, abilities_nexus in zip(nexuses, abilities):
-            if AbilityId.EFFECT_CHRONOBOOSTENERGYCOST in abilities_nexus:
-                if self.supply_workers < (22 * self.townhalls.amount) and not nexus.is_idle and not nexus.has_buff(BuffId.CHRONOBOOSTENERGYCOST):
-                    self.do(loop_nexus(AbilityId.EFFECT_CHRONOBOOSTENERGYCOST, nexus))
-                    break
-                else:
-                    for gateway in self.structures(GATEWAY).ready:
-                        if not gateway.is_idle:
-                            self.do(loop_nexus(AbilityId.EFFECT_CHRONOBOOSTENERGYCOST, gateway))
-                            break
+        for i in range(self.townhalls.amount):
+            chrono_nexus = self.townhalls[i]
+            for j in range(i, self.townhalls.amount):
+                if chrono_nexus.energy < 50:
+                    break 
+                nexus = self.townhalls[j]
+                if not nexus.is_idle and not nexus.has_buff(BuffId.CHRONOBOOSTENERGYCOST):
+                    self.do(chrono_nexus(AbilityId.EFFECT_CHRONOBOOSTENERGYCOST, nexus))
+            
+            for gateway in self.structures(GATEWAY).ready:
+                if chrono_nexus.energy < 50:
+                    break 
+                if not gateway.is_idle and not gateway.has_buff(BuffId.CHRONOBOOSTENERGYCOST):
+                    self.do(chrono_nexus(AbilityId.EFFECT_CHRONOBOOSTENERGYCOST, gateway))
 
     async def build_workers(self):
         if self.supply_workers < (22 * len(self.townhalls)):
