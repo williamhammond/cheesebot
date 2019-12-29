@@ -9,7 +9,7 @@ test_requirements = convert_deps_to_pip(pfile["dev-packages"], r=False)
 
 setup(
     name="williamhammond",
-    packages=find_packages(exclude=["examples*", "examples"]),
+    packages=find_packages(),
     version="1.0.0",
     description="A Starcraft 2 Bot",
     license="MIT",

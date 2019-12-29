@@ -1,13 +1,13 @@
 import sc2
-from sc2 import run_game, maps, Race, Difficulty
 from sc2.ids.buff_id import BuffId
 from sc2.ids.ability_id import AbilityId
-from sc2.player import Bot, Computer
 from sc2.constants import PROBE, PYLON, NEXUS, ASSIMILATOR, GATEWAY, CYBERNETICSCORE, STALKER
+from sc2.player import Bot, Computer
+from sc2 import run_game, maps, Race, Difficulty
 
 import random
 
-class CheeseBot(sc2.BotAI):
+class StalkerTimingBot(sc2.BotAI):
     async def on_step(self, iteration: int):
         await self.defend()
         await self.distribute_workers()
@@ -22,6 +22,9 @@ class CheeseBot(sc2.BotAI):
     
     async def on_start(self):
         await self.chat_send('glhf')
+    
+    async def on_end(self, game_info):
+        print(game_info)
 
     async def handle_chrono(self):
         for i in range(self.townhalls.amount):
@@ -121,7 +124,17 @@ class CheeseBot(sc2.BotAI):
         else:
             return self.enemy_start_locations[0]
 
-run_game(maps.get("AcropolisLE"), [
-    Bot(Race.Protoss, CheeseBot()),
-    Computer(Race.Terran, Difficulty.VeryHard)
-], realtime=False)
+def main():
+    player_config = [
+        Bot(Race.Protoss, StalkerTimingBot()),
+        Computer(Race.Terran, Difficulty.Easy)
+    ]
+
+    run_game(
+        maps.get("AcropolisLE"),
+        player_config,
+        realtime=False
+    )
+
+if __name__ == "__main__":
+    main()
