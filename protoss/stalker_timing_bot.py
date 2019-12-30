@@ -4,8 +4,14 @@ from sc2.ids.ability_id import AbilityId
 from sc2.constants import PROBE, PYLON, NEXUS, ASSIMILATOR, GATEWAY, CYBERNETICSCORE, STALKER
 from sc2.player import Bot, Computer
 from sc2 import run_game, maps, Race, Difficulty
+import sc2
+
+from os import listdir
+from os.path import isfile, join
 
 import random
+
+PATH_TO_MAPS = "C:\\Program Files (x86)\\StarCraft II\\Maps"
 
 class StalkerTimingBot(sc2.BotAI):
     async def on_step(self, iteration: int):
@@ -125,16 +131,24 @@ class StalkerTimingBot(sc2.BotAI):
             return self.enemy_start_locations[0]
 
 def main():
-    player_config = [
-        Bot(Race.Protoss, StalkerTimingBot()),
-        Computer(Race.Terran, Difficulty.Easy)
-    ]
+    races = [Race.Protoss, Race.Zerg, Race.Terran]
+    difficulties = Difficulty.Easy, Difficulty.Medium, Difficulty.Hard
+    maps = [f.split('.')[0]  for f in listdir(PATH_TO_MAPS) if isfile(join(PATH_TO_MAPS, f))]
 
-    run_game(
-        maps.get("AcropolisLE"),
-        player_config,
-        realtime=False
-    )
+    for game_map in maps:
+        for race in races:
+            for difficulty in difficulties:
+                player_config = [
+                    Bot(Race.Protoss, StalkerTimingBot()),
+                    Computer(race, difficulty)
+                ]
+                game_generator = sc2.main._host_game_iter(
+                    sc2.maps.get(game_map),
+                    player_config,
+                    realtime=False
+                )
+                for _ in range(2):
+                    next(game_generator)
 
 if __name__ == "__main__":
     main()
