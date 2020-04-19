@@ -10,6 +10,8 @@ from os import listdir
 from os.path import isfile, join
 
 import random
+import json
+import itertools
 
 PATH_TO_MAPS = "C:\\Program Files (x86)\\StarCraft II\\Maps"
 
@@ -29,8 +31,11 @@ class StalkerTimingBot(sc2.BotAI):
     async def on_start(self):
         await self.chat_send('glhf')
     
-    async def on_end(self, game_info):
-        print(game_info)
+    async def on_end(self, game_result):
+        result = {}
+        result['players'] = self.game_info.players
+        result['result'] = game_result
+        print(json.dumps(result))
 
     async def handle_chrono(self):
         for i in range(self.townhalls.amount):
@@ -132,23 +137,32 @@ class StalkerTimingBot(sc2.BotAI):
 
 def main():
     races = [Race.Protoss, Race.Zerg, Race.Terran]
-    difficulties = Difficulty.Easy, Difficulty.Medium, Difficulty.Hard
     maps = [f.split('.')[0]  for f in listdir(PATH_TO_MAPS) if isfile(join(PATH_TO_MAPS, f))]
+    builds = [
+        sc2.AIBuild.RandomBuild,
+        sc2.AIBuild.Rush,
+        sc2.AIBuild.Timing,
+        sc2.AIBuild.Power,
+        sc2.AIBuild.Macro,
+        sc2.AIBuild.Air,
+    ]
+    difficulties = [
+        sc2.Difficulty.VeryEasy,
+        sc2.Difficulty.Easy,
+        sc2.Difficulty.Medium,
+        sc2.Difficulty.MediumHard,
+        sc2.Difficulty.Hard,
+        sc2.Difficulty.Harder,
+        sc2.Difficulty.VeryHard,
+        sc2.Difficulty.CheatVision,
+        sc2.Difficulty.CheatMoney,
+        sc2.Difficulty.CheatInsane,
+    ]
 
-    for game_map in maps:
-        for race in races:
-            for difficulty in difficulties:
-                player_config = [
-                    Bot(Race.Protoss, StalkerTimingBot()),
-                    Computer(race, difficulty)
-                ]
-                game_generator = sc2.main._host_game_iter(
-                    sc2.maps.get(game_map),
-                    player_config,
-                    realtime=False
-                )
-                for _ in range(2):
-                    next(game_generator)
+    for sc2map, build, difficulty, race in itertools.product(maps, builds, difficulties, races):
+        bot = sc2.player.Bot(Race.Protoss, StalkerTimingBot())
+        builtin_bot = sc2.player.Computer(race, difficulty, build)
+        sc2.run_game(sc2.maps.get(sc2map), [bot, builtin_bot], realtime=False)
 
 if __name__ == "__main__":
     main()
